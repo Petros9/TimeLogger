@@ -6,6 +6,7 @@ import core.auth.AuthService
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import io.circe.generic.codec.DerivedAsObjectCodec.deriveCodec
 import io.circe.syntax.EncoderOps
+import akka.http.scaladsl.server.Directives._
 
 import scala.concurrent.ExecutionContext
 
@@ -28,7 +29,7 @@ class AuthRoute(authService: AuthService)(implicit executionContext: ExecutionCo
           }
         }
       }
-    }
+    } ~
       path("signUp") {
         pathEndOrSingleSlash {
           post {

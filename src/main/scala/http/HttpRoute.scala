@@ -5,7 +5,7 @@ import akka.http.scaladsl.server.Route
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import core.auth.AuthService
 import http.routes.AuthRoute
-
+import akka.http.scaladsl.server.Directives._
 import scala.concurrent.ExecutionContext
 
 class HttpRoute(
@@ -18,13 +18,14 @@ class HttpRoute(
   val route: Route =
     cors() {
       pathPrefix("v1") {
+        println("hey")
           authRouter.route
-      }
-        pathPrefix("healthcheck") {
+      } ~
+      pathPrefix("healthcheck") {
           get {
             complete("OK")
           }
-        }
+      }
     }
 
 }

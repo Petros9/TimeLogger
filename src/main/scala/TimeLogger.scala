@@ -3,35 +3,36 @@ import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import core.auth.{AuthService, JdbcAuthDataStorage}
 import http.HttpRoute
-import utils.Config
-import utils.database.{DatabaseConnector, DatabaseMigrationManager}
+
+import utils.database.{DatabaseConnector, DatabaseMigrationManager, Config}
 
 import scala.concurrent.ExecutionContext
 
 object TimeLogger extends App {
 
   def startApplication() = {
-    implicit val actorSystem                     = ActorSystem()
+    implicit val actorSystem: ActorSystem = ActorSystem()
     implicit val executor: ExecutionContext      = actorSystem.dispatcher
 
-    val config = Config.load()
+    val config = new Config
 
-    new DatabaseMigrationManager(
-      config.database.jdbcUrl,
-      config.database.username,
-      config.database.password
-    ).migrateDatabaseSchema()
+    /*new DatabaseMigrationManager(
+      config.jdbcUrl,
+      config.username,
+      config.password
+    ).migrateDatabaseSchema()*/
 
     val databaseConnector = new DatabaseConnector(
-      config.database.jdbcUrl,
-      config.database.username,
-      config.database.password
+      config.jdbcUrl,
+      config.username,
+      config.password
     )
+
     val authDataStorage    = new JdbcAuthDataStorage(databaseConnector)
     val authService  = new AuthService(authDataStorage, config.secretKey)
     val httpRoute    = new HttpRoute(authService, config.secretKey)
 
-    Http().newServerAt(config.http.host, config.http.port).bind(httpRoute.route)
+    Http().newServerAt(config.host, config.port).bind(httpRoute.route)
   }
 
   startApplication()

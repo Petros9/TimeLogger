@@ -21,7 +21,6 @@ class ProjectService(projectDataStorage: ProjectDataStorage)
   }
 
   def updateProject(id: String, projectUpdate: ProjectDataUpdate): Future[Option[Project]] = {
-    val projects =
     projectDataStorage
       .getProject(id)
       .mapT(projectUpdate.merge)
