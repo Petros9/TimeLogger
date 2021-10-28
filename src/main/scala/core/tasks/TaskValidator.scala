@@ -17,8 +17,20 @@ class TaskValidator(taskDataStorage: TaskDataStorage, projectValidator: ProjectV
     }
   }
 
-  def timeDoesNotOverlap(startPointer: Option[Long], workingTime: Option[Long], projectId: ProjectId): Boolean = {
-    ???
+  def boundariesOverlap(newStartPointer: Long, newEndPointer: Long, existingStartPointer: Long, existingEndPointer: Long): Boolean = {
+    if(newStartPointer > existingStartPointer && newStartPointer < existingEndPointer) true
+    else {
+      if(newEndPointer > existingStartPointer && newEndPointer < existingEndPointer) true
+      else newStartPointer < existingStartPointer && newEndPointer > existingEndPointer
+    }
+  }
+
+  def timeDoesNotOverlap(startPointer: Long, workingTime: Long, projectId: ProjectId): Boolean = {
+    val dbTasks = Await.result(taskDataStorage.getProjectTasks(projectId), Duration.Inf)
+
+    !dbTasks.exists(dbTask => {
+      dbTask.endPointer != 0L && boundariesOverlap(startPointer, startPointer + workingTime, dbTask.startPointer, dbTask.startPointer + dbTask.workingTime)
+    })
   }
 
   def getTaskToBeUpdated(taskId: TaskId): Option[Task] = {

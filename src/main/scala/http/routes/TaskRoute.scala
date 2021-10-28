@@ -7,8 +7,9 @@ import io.circe.syntax.EncoderOps
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import core.tasks.TaskService
-import core.{ TaskDataUpdate, Task}
+import core.{Task, TaskDataUpdate}
 import utils.SecurityDirectives.authenticate
+import utils.exceptions.{NameOccupiedException, NameOccupiedResponse, NoResourceException, NoResourceResponse, NotAuthorisedException, NotAuthorisedResponse, TimeConflictException, TimeConflictResponse}
 
 import scala.concurrent.ExecutionContext
 class TaskRoute(
@@ -23,17 +24,34 @@ class TaskRoute(
       authenticate(secretKey) { userId =>
         put {
           entity(as[Task]) { task =>
-            complete(createTask(task).map(_.asJson))
+            complete(
+              try createTask(task).map(_.asJson)
+              catch {
+                case _: NoResourceException => NoResourceResponse().asJson
+                case _: TimeConflictException => TimeConflictResponse().asJson
+              })
           }
         } ~
           delete {
             entity(as[Id]) { id =>
-              complete(deleteTask(id.id, userId).map(_.asJson))
+              complete(
+                try deleteTask(id.id, userId).map(_.asJson)
+                catch {
+                  case _: NoResourceException => NoResourceResponse().asJson
+                  case _: TimeConflictException => TimeConflictResponse().asJson
+                  case _: NotAuthorisedException => NotAuthorisedResponse().asJson
+                })
             }
           } ~
           post {
             entity(as[IdAndUpdateTaskData]) { idAndUpdateTaskData =>
-              complete(updateTask(idAndUpdateTaskData.id, idAndUpdateTaskData.updateTaskData, userId).map(_.asJson))
+              complete(
+                try updateTask(idAndUpdateTaskData.id, idAndUpdateTaskData.updateTaskData, userId).map(_.asJson)
+                catch {
+                  case _: NoResourceException => NoResourceResponse().asJson
+                  case _: TimeConflictException => TimeConflictResponse().asJson
+                  case _: NotAuthorisedException => NotAuthorisedResponse().asJson
+                })
             }
           }
       }

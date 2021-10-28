@@ -7,9 +7,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 sealed trait ProjectDataStorage {
 
-  def getProjects(): Future[Seq[Project]]
+  def getProjects(token: UserId): Future[Seq[Project]]
 
-  def getProject(id: String): Future[Option[Project]]
+  def getProject(id: ProjectId): Future[Option[Project]]
 
   def saveProject(project: Project): Future[Project]
 
@@ -24,9 +24,9 @@ class JdbcProjectDataStorage(val databaseConnector: DatabaseConnector)(implicit 
   import databaseConnector._
   import databaseConnector.profile.api._
 
-  def getProjects(): Future[Seq[Project]] = db.run(projects.result)
+  def getProjects(token: UserId): Future[Seq[Project]] = db.run(projects.filter(_.owner === token).result)
 
-  def getProject(id: String): Future[Option[Project]] = db.run(projects.filter(_.id === id).result.headOption)
+  def getProject(id: ProjectId): Future[Option[Project]] = db.run(projects.filter(_.id === id).result.headOption)
 
   def saveProject(project: Project): Future[Project] =
     db.run(projects.insertOrUpdate(project)).map(_ => project)
@@ -43,10 +43,10 @@ class InMemoryUserProjectStorage extends ProjectDataStorage {
 
   private var state: Seq[Project] = Nil
 
-  override def getProjects(): Future[Seq[Project]] =
-    Future.successful(state)
+  override def getProjects(token: UserId): Future[Seq[Project]] =
+    Future.successful(state.filter(_.owner == token))
 
-  override def getProject(id: String): Future[Option[Project]] =
+  override def getProject(id: ProjectId): Future[Option[Project]] =
     Future.successful(state.find(_.id == id))
 
   override def saveProject(project: Project): Future[Project] =

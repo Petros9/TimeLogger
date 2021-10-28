@@ -9,6 +9,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import core.{Project, ProjectDataUpdate}
 import utils.SecurityDirectives.authenticate
+import utils.exceptions.{NameOccupiedException, NameOccupiedResponse, NoResourceException, NoResourceResponse, NotAuthorisedException, NotAuthorisedResponse, TimeConflictResponse}
 
 import scala.concurrent.ExecutionContext
 class ProjectRoute(
@@ -24,22 +25,45 @@ class ProjectRoute(
         authenticate(secretKey) { userId =>
           put {
             entity(as[Project]) { project =>
-              complete(createProject(project).map(_.asJson))
+              complete(
+                try createProject(project).map(_.asJson)
+                catch  {
+                  case _: NotAuthorisedException => NotAuthorisedResponse().asJson
+                })
             }
           } ~
             delete {
               entity(as[Id]) { id =>
-                complete(deleteProject(id.id, userId).map(_.asJson))
+                complete(
+                  try deleteProject(id.id, userId).map(_.asJson)
+                  catch {
+                    case _: NotAuthorisedException => NotAuthorisedResponse().asJson
+                    case _: NoResourceException => NoResourceResponse().asJson
+                    case _: NameOccupiedException => NameOccupiedResponse().asJson
+                  }
+                )
               }
             } ~
             post {
               entity(as[IdAndUpdateProjectData]) { idAndUpdateProjectData =>
-                complete(updateProject(idAndUpdateProjectData.id, idAndUpdateProjectData.updateProjectData, userId).map(_.asJson))
+                complete(
+                  try updateProject(idAndUpdateProjectData.id, idAndUpdateProjectData.updateProjectData, userId).map(_.asJson)
+                  catch {
+                    case _: NotAuthorisedException => NotAuthorisedResponse().asJson
+                    case _: NoResourceException => NoResourceResponse().asJson
+                    case _: NameOccupiedException => NameOccupiedResponse().asJson
+                  }
+                )
               }
             } ~
             get {
               entity(as[Id]) { id =>
-                complete(getProject(id.id, userId).map(_.asJson))
+                complete(
+                  try getProject(id.id, userId).map(_.asJson)
+                  catch {
+                    case _: NotAuthorisedException => NotAuthorisedResponse().asJson
+                  }
+                )
               }
             }
         }

@@ -1,17 +1,17 @@
 package core.tasks
 
-import core.Task
+import core.{ProjectId, Task}
 import utils.database.DatabaseConnector
 
 import scala.concurrent.{ExecutionContext, Future}
 
 sealed trait TaskDataStorage {
 
-  def getTasks: Future[Seq[Task]]
-
   def getTask(id: String): Future[Option[Task]]
 
   def saveTask(task: Task): Future[Task]
+
+  def getProjectTasks(projectId: ProjectId): Future[Seq[Task]]
 
 }
 
@@ -22,7 +22,7 @@ class JdbcTaskDataStorage(val databaseConnector: DatabaseConnector)(implicit exe
   import databaseConnector._
   import databaseConnector.profile.api._
 
-  def getTasks(): Future[Seq[Task]] = db.run(tasks.result)
+  def getProjectTasks(projectId: ProjectId): Future[Seq[Task]] = db.run(tasks.filter(_.projectId === projectId).result)
 
   def getTask(id: String): Future[Option[Task]] = db.run(tasks.filter(_.id === id).result.headOption)
 
@@ -34,11 +34,12 @@ class InMemoryUserTaskStorage extends TaskDataStorage {
 
   private var state: Seq[Task] = Nil
 
-  override def getTasks(): Future[Seq[Task]] =
-    Future.successful(state)
+  override def getProjectTasks(projectId: ProjectId): Future[Seq[Task]] =
+    Future.successful(state.filter(_.projectId == projectId))
 
   override def getTask(id: String): Future[Option[Task]] =
     Future.successful(state.find(_.id == id))
+
 
   override def saveTask(task: Task): Future[Task] =
     Future.successful {

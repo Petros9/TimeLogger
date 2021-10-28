@@ -2,8 +2,8 @@ import akka.actor.ActorSystem
 import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import core.auth.{AuthService, JdbcAuthDataStorage}
-import core.projects.{JdbcProjectDataStorage, ProjectDataStorage, ProjectService}
-import core.tasks.{JdbcTaskDataStorage, TaskService}
+import core.projects.{JdbcProjectDataStorage, ProjectDataStorage, ProjectService, ProjectValidator}
+import core.tasks.{JdbcTaskDataStorage, TaskService, TaskValidator}
 import http.HttpRoute
 import utils.database.{Config, DatabaseConnector}
 
@@ -27,10 +27,12 @@ object TimeLogger extends App {
     val authService  = new AuthService(authDataStorage, config.secretKey)
 
     val projectDataStorage = new JdbcProjectDataStorage(databaseConnector)
-    val projectService = new ProjectService(projectDataStorage)
+    val projectValidator = new ProjectValidator(projectDataStorage)
+    val projectService = new ProjectService(projectDataStorage, projectValidator)
 
     val taskDataStorage = new JdbcTaskDataStorage(databaseConnector)
-    val taskService = new TaskService(taskDataStorage)
+    val taskValidator = new TaskValidator(taskDataStorage, projectValidator)
+    val taskService = new TaskService(taskDataStorage, taskValidator, projectValidator)
 
     val httpRoute    = new HttpRoute(taskService, projectService, authService, config.secretKey)
 
