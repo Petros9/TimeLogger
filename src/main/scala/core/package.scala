@@ -12,18 +12,19 @@ package object core {
     require(username.nonEmpty, "username.empty")
   }
 
-  final case class Project(id: ProjectId, projectName: String, startPointer: Long, endPointer: Long) {
+  final case class Project(id: ProjectId, projectName: String, startPointer: Long, endPointer: Long = 0, owner: UserId) {
     require(id.nonEmpty, "id.empty")
     require(projectName.nonEmpty, "name.empty")
     require(startPointer.isNaN, "start.pointer.empty")
+    require(owner.nonEmpty, "owner.empty")
   }
 
   final case class ProjectDataUpdate(projectName: Option[String] = None, endPointer: Option[Long] = None) {
     def merge(project: Project): Project =
-      Project(project.id, projectName.getOrElse(project.projectName), project.startPointer, endPointer.getOrElse(project.endPointer))
+      Project(project.id, projectName.getOrElse(project.projectName), project.startPointer, endPointer.getOrElse(project.endPointer), project.owner)
   }
 
-  final case class Task(id: TaskId, projectId: ProjectId, startPointer: Long, volume: Int, workingTime: Long,  desc: String, endPointer: Long) {
+  final case class Task(id: TaskId, projectId: ProjectId, startPointer: Long, volume: Int, workingTime: Long,  desc: String, endPointer: Long = 0) {
     require(id.nonEmpty, "id.empty")
     require(projectId.nonEmpty, "project.empty")
     require(startPointer.isNaN, "start.pointer.empty")

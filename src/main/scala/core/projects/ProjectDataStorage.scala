@@ -1,6 +1,6 @@
 package core.projects
 
-import core.Project
+import core.{Project, ProjectId, UserId}
 import utils.database.DatabaseConnector
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -11,7 +11,9 @@ sealed trait ProjectDataStorage {
 
   def getProject(id: String): Future[Option[Project]]
 
-  def saveProject(profile: Project): Future[Project]
+  def saveProject(project: Project): Future[Project]
+
+  def nameIsFreeToBeUsed(newProjectName: String): Future[Option[Project]]
 
 }
 
@@ -28,9 +30,16 @@ class JdbcProjectDataStorage(val databaseConnector: DatabaseConnector)(implicit 
 
   def saveProject(project: Project): Future[Project] =
     db.run(projects.insertOrUpdate(project)).map(_ => project)
+
+
+
+
+  // VALIDATE FUNCTIONS
+  def nameIsFreeToBeUsed(newProjectName: String): Future[Option[Project]] = db.run(projects.filter(_.projectName === newProjectName).result.headOption)
+
 }
 
-class InMemoryUserProfileStorage extends ProjectDataStorage {
+class InMemoryUserProjectStorage extends ProjectDataStorage {
 
   private var state: Seq[Project] = Nil
 
@@ -46,5 +55,8 @@ class InMemoryUserProfileStorage extends ProjectDataStorage {
       state = state :+ project
       project
     }
+
+  def nameIsFreeToBeUsed(newProjectName: String): Future[Option[Project]] =
+    Future.successful(state.find(_.projectName == newProjectName))
 
 }
