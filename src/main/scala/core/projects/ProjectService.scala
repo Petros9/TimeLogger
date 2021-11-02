@@ -1,12 +1,11 @@
 package core.projects
 
-import core.{Project, ProjectDataUpdate}
+import core.{Project, ProjectDataUpdate, ProjectId, ProjectsFilters}
 import utils.MonadTransformers.FutureOptionMonadTransformer
-import utils.exceptions.{NameOccupiedException, NoResourceException, NotAuthorisedException}
+import utils.responses.{NameOccupiedException, NoResourceException, NotAuthorisedException}
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class ProjectService(projectDataStorage: ProjectDataStorage, projectValidator: ProjectValidator)
   (implicit executionContext: ExecutionContext) {
@@ -14,8 +13,54 @@ class ProjectService(projectDataStorage: ProjectDataStorage, projectValidator: P
   def deleteProject(id: String, token: String): Future[Option[Project]]=
     updateProject(id, ProjectDataUpdate(None, Option(System.currentTimeMillis())), token)
 
-  def getProjects(token: String): Future[Seq[Project]] = {
-    projectDataStorage.getProjects(token)
+  def idListFilter(projectId: ProjectId, projectIdListOption: Option[Seq[ProjectId]]): Boolean = {
+        projectIdListOption match {
+          case Some(projectIdList) => projectIdList.contains(projectId)
+          case None => true
+        }
+  }
+
+  def startTimeFilter(projectStartTime: Long, startTimeOption: Option[Long]): Boolean = {
+    startTimeOption match {
+      case Some(startTime) => startTime >= projectStartTime
+      case None => true
+    }
+  }
+
+  def endTimeFilter(projectEndTime: Long, endTimeOption: Option[Long]): Boolean = {
+    endTimeOption match {
+      case Some(endTime) => projectEndTime <= endTime
+      case None => true
+    }
+  }
+
+  def deleted(projectEndTime: Long, deletedOption: Option[Boolean]): Boolean = {
+    deletedOption match {
+      case Some(deleted) => {
+        val isProjectDeleted = projectEndTime == 0L
+        deleted == isProjectDeleted
+      }
+      case None => true
+    }
+  }
+
+  def sortByStartTime(projects: Seq[Project], creationTimeSortingOption: Option[Boolean]): Seq[Project] = {
+    creationTimeSortingOption match {
+      case Some(creationTimeSortingOption) =>
+        if(creationTimeSortingOption) projects.sortBy(_.startPointer)
+        else projects.sortBy(_.startPointer).reverse
+
+      case None => projects
+    }
+  }
+
+  def getProjects(token: String, projectFilters: ProjectsFilters): Seq[Project] = {
+    val allProjects = Await.result(projectDataStorage.getProjects(token), Duration.Inf)
+    val filteredProjects = allProjects.filter(project =>
+      idListFilter(project.id, projectFilters.idList) &&
+        startTimeFilter(project.startPointer, projectFilters.startTime) &&
+          endTimeFilter(project.endPointer, projectFilters.endTime))
+    filteredProjects.sortBy(_.startPointer)
   }
 
   @throws(classOf[NotAuthorisedException])

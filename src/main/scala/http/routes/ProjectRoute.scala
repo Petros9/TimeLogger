@@ -1,20 +1,22 @@
 package http.routes
 
-import akka.http.scaladsl.server.Directives.{as, complete, entity, path, pathEndOrSingleSlash, pathPrefix, post}
+import akka.http.scaladsl.server.Directives.{as, complete, entity, path, pathEndOrSingleSlash, pathPrefix, post, _}
+import akka.http.scaladsl.server.Route
 import core.projects.ProjectService
+import core.tasks.TaskService
+import core.{Project, ProjectDataUpdate, ProjectsFilters}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import io.circe.generic.codec.DerivedAsObjectCodec.deriveCodec
 import io.circe.syntax.EncoderOps
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import core.{Project, ProjectDataUpdate}
 import utils.SecurityDirectives.authenticate
-import utils.exceptions.{NameOccupiedException, NameOccupiedResponse, NoResourceException, NoResourceResponse, NotAuthorisedException, NotAuthorisedResponse, TimeConflictResponse}
+import utils.responses._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext}
 class ProjectRoute(
                     secretKey: String,
-                    projectService: ProjectService
+                    projectService: ProjectService,
+                    taskService: TaskService
                   )(implicit executionContext: ExecutionContext)
   extends FailFastCirceSupport {
   import projectService._
@@ -59,7 +61,12 @@ class ProjectRoute(
             get {
               entity(as[Id]) { id =>
                 complete(
-                  try getProject(id.id, userId).map(_.asJson)
+                  try getProject(id.id, userId).map( project =>
+                    {
+                      val tasks = Await.result(taskService.getProjectTasks(project.get.id, userId), Duration.Inf)
+                      ProjectInfoResponse(project.get, tasks, tasks.map(_.workingTime).sum).asJson
+                    }
+                  )
                   catch {
                     case _: NotAuthorisedException => NotAuthorisedResponse().asJson
                   }
@@ -73,7 +80,9 @@ class ProjectRoute(
       pathEndOrSingleSlash {
         authenticate(secretKey) { userId =>
           get {
-            complete(getProjects(userId).map(_.asJson))
+            entity(as[ProjectsFilters]) { projectFilters =>
+              complete(ProjectsInfoResponse( getProjects(userId, projectFilters), projectFilters.updateTimeIncSorting, taskService).asJson)
+            }
           }
         }
       }

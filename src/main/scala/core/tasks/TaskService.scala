@@ -3,7 +3,7 @@ package core.tasks
 import core.projects.ProjectValidator
 import core.{ProjectId, Task, TaskDataUpdate}
 import utils.MonadTransformers.FutureOptionMonadTransformer
-import utils.exceptions.{NoResourceException, NotAuthorisedException, TimeConflictException}
+import utils.responses.{NoResourceException, NotAuthorisedException, TimeConflictException}
 
 import scala.concurrent.{ExecutionContext, Future}
 

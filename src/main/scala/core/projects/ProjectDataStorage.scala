@@ -1,6 +1,6 @@
 package core.projects
 
-import core.{Project, ProjectId, UserId}
+import core.{Project, ProjectId, ProjectsFilters, UserId}
 import utils.database.DatabaseConnector
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -23,6 +23,7 @@ class JdbcProjectDataStorage(val databaseConnector: DatabaseConnector)(implicit 
 
   import databaseConnector._
   import databaseConnector.profile.api._
+  //case class ProjectsFilters(startTime: Long = 0L, endTime: Long = 0L, deleted: DeletedPointer.Value = DeletedPointer.All, creationTimeSorting: CreationTimeSorting.Value = CreationTimeSorting.None, updateTimeSorting: UpdateTimeSorting.Value = UpdateTimeSorting.None)
 
   def getProjects(token: UserId): Future[Seq[Project]] = db.run(projects.filter(_.owner === token).result)
 

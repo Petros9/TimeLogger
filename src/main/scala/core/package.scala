@@ -35,4 +35,6 @@ package object core {
     def merge(task: Task): Task =
       Task(task.id, task.projectId, startPointer.getOrElse(task.startPointer), volume.getOrElse(task.volume), workingTime.getOrElse(task.workingTime), desc.getOrElse(task.desc), endPointer.getOrElse(task.endPointer))
   }
+
+  case class ProjectsFilters(idList: Option[Seq[ProjectId]], startTime: Option[Long], endTime: Option[Long], deleted: Option[Boolean], creationTimeIncSorting: Option[Boolean], updateTimeIncSorting: Option[Boolean])
 }
