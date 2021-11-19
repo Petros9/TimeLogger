@@ -22,7 +22,7 @@ class ProjectService(projectDataStorage: ProjectDataStorage, projectValidator: P
 
   def startTimeFilter(projectStartTime: Long, startTimeOption: Option[Long]): Boolean = {
     startTimeOption match {
-      case Some(startTime) => startTime >= projectStartTime
+      case Some(startTime) => startTime <= projectStartTime
       case None => true
     }
   }
@@ -34,12 +34,12 @@ class ProjectService(projectDataStorage: ProjectDataStorage, projectValidator: P
     }
   }
 
-  def deleted(projectEndTime: Long, deletedOption: Option[Boolean]): Boolean = {
+  def deletedFilter(projectEndTime: Long, deletedOption: Option[Boolean]): Boolean = {
     deletedOption match {
-      case Some(deleted) => {
-        val isProjectDeleted = projectEndTime == 0L
+      case Some(deleted) =>
+        val isProjectDeleted = projectEndTime != 0L
         deleted == isProjectDeleted
-      }
+
       case None => true
     }
   }
@@ -56,11 +56,11 @@ class ProjectService(projectDataStorage: ProjectDataStorage, projectValidator: P
 
   def getProjects(token: String, projectFilters: ProjectsFilters): Seq[Project] = {
     val allProjects = Await.result(projectDataStorage.getProjects(token), Duration.Inf)
-    val filteredProjects = allProjects.filter(project =>
+    sortByStartTime(allProjects.filter(project =>
       idListFilter(project.id, projectFilters.idList) &&
         startTimeFilter(project.startPointer, projectFilters.startTime) &&
-          endTimeFilter(project.endPointer, projectFilters.endTime))
-    filteredProjects.sortBy(_.startPointer)
+          endTimeFilter(project.endPointer, projectFilters.endTime) &&
+            deletedFilter(project.endPointer, projectFilters.deleted)), projectFilters.creationTimeIncSorting)
   }
 
   @throws(classOf[NotAuthorisedException])
