@@ -8,6 +8,7 @@ import scala.concurrent.duration.Duration
 
 class TaskValidator(taskDataStorage: TaskDataStorage, projectValidator: ProjectValidator) {
 
+
   def isOwner(taskId: TaskId, token: UserId): Boolean = {
     val taskOption = Await.result(taskDataStorage.getTask(taskId), Duration.Inf)
 

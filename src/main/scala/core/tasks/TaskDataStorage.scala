@@ -30,7 +30,7 @@ class JdbcTaskDataStorage(val databaseConnector: DatabaseConnector)(implicit exe
     db.run(tasks.insertOrUpdate(task)).map(_ => task)
 }
 
-class InMemoryUserTaskStorage extends TaskDataStorage {
+class InMemoryTaskStorage extends TaskDataStorage {
 
   private var state: Seq[Task] = Nil
 

@@ -27,8 +27,8 @@ package object core {
   final case class Task(id: TaskId, projectId: ProjectId, startPointer: Long, volume: Int, workingTime: Long,  desc: String, endPointer: Long = 0) {
     require(id.nonEmpty, "id.empty")
     require(projectId.nonEmpty, "project.empty")
-    require(startPointer.isNaN, "start.pointer.empty")
-    require(startPointer.isNaN, "working.time.empty")
+    require(!startPointer.isNaN, "start.pointer.empty")
+    require(!workingTime.isNaN, "working.time.empty")
   }
 
   final case class TaskDataUpdate(startPointer: Option[Long] = None, volume: Option[Int] = None, workingTime: Option[Long],  desc: Option[String] = None, endPointer: Option[Long] = None) {

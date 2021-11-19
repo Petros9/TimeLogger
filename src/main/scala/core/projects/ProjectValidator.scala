@@ -8,11 +8,15 @@ import scala.concurrent.duration.Duration
 
 class ProjectValidator (projectDataStorage: ProjectDataStorage){
   def isOwner(projectId: ProjectId, token: UserId): Boolean = {
+    println(projectId)
     val projectOption = Await.result(projectDataStorage.getProject(projectId), Duration.Inf)
-
     projectOption match {
-      case Some(project) => project.owner.equals(token)
-      case None => false
+      case Some(project) =>
+        println(project.owner + "####")
+        project.owner.equals(token)
+      case None =>
+        println("!!!!!")
+        false
     }
   }
 
