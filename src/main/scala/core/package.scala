@@ -15,7 +15,7 @@ package object core {
   final case class Project(id: ProjectId, projectName: String, startPointer: Long, endPointer: Long = 0, owner: UserId) {
     require(id.nonEmpty, "id.empty")
     require(projectName.nonEmpty, "name.empty")
-    require(startPointer.isNaN, "start.pointer.empty")
+    require(!startPointer.isNaN, "start.pointer.empty")
     require(owner.nonEmpty, "owner.empty")
   }
 

@@ -6,12 +6,12 @@ scalaVersion := "2.13.5"
 resolvers += "jitpack" at "https://jitpack.io"
 
 libraryDependencies ++= {
-  val akkaV = "2.6.13"
-  val akkaHttpV = "10.2.4"
-  val scalaTestV = "3.2.5"
+  val akkaV = "2.6.17"
+  val akkaHttpV = "10.2.6"
+  val scalaTestV = "3.2.9"
   val slickVersion = "3.3.3"
   val circeV = "0.12.3"
-  val sttpV = "3.2.0"
+  val sttpV = "3.3.16"
   Seq(
     "com.typesafe.akka" %% "akka-actor" % akkaV,
     "com.typesafe.akka" %% "akka-stream" % akkaV,
@@ -62,7 +62,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-stream-testkit" % akkaV % Test,
     "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpV % Test,
     "org.scalatest" %% "scalatest" % scalaTestV % Test,
-    "org.mockito" %% "mockito-scala-scalatest" % "1.16.32" % Test,
+    "org.mockito" %% "mockito-scala-scalatest" % "1.16.46" % Test,
     "ru.yandex.qatools.embed" % "postgresql-embedded" % "2.10" % Test
   )
 }

@@ -25,7 +25,7 @@ class AuthService(
       .saveAuthData(AuthData(UUID.randomUUID().toString, login))
       .map(authData => encodeToken(authData.id))
 
-  private def encodeToken(userId: UserId): AuthToken =
+  def encodeToken(userId: UserId): AuthToken =
     Jwt.encode(AuthTokenContent(userId).asJson.noSpaces, secretKey, JwtAlgorithm.HS256)
 
 }

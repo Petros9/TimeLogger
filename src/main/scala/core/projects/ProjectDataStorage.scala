@@ -40,7 +40,7 @@ class JdbcProjectDataStorage(val databaseConnector: DatabaseConnector)(implicit 
 
 }
 
-class InMemoryUserProjectStorage extends ProjectDataStorage {
+class InMemoryProjectStorage extends ProjectDataStorage {
 
   private var state: Seq[Project] = Nil
 

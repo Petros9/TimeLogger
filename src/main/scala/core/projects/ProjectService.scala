@@ -89,7 +89,7 @@ class ProjectService(projectDataStorage: ProjectDataStorage, projectValidator: P
       throw new NotAuthorisedException
     } else if(!projectValidator.isNotDeleted(id)){
       throw new NoResourceException
-    } else if (projectValidator.nameIsFreeToBeUsed(projectUpdate.projectName)){
+    } else if (!projectValidator.nameIsFreeToBeUsed(projectUpdate.projectName)){
       throw new NameOccupiedException
     } else {
       projectDataStorage
