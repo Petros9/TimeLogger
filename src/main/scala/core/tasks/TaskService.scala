@@ -32,7 +32,7 @@ class TaskService(taskDataStorage: TaskDataStorage, taskValidator: TaskValidator
   def createTask(task: Task): Future[Task] = {
     if(!projectValidator.isNotDeleted(task.projectId)){
       throw new NoResourceException
-    } else if(!taskValidator.timeDoesNotOverlap(task.startPointer, task.workingTime, task.projectId)){
+    } else if(!taskValidator.timeDoesNotOverlap(task.startPointer, task.workingTime, task.projectId, task.id)){
       throw new TimeConflictException
     } else {
       taskDataStorage.saveTask(task)
@@ -53,7 +53,7 @@ class TaskService(taskDataStorage: TaskDataStorage, taskValidator: TaskValidator
           throw new NoResourceException
         } else if(!taskValidator.timeDoesNotOverlap(taskUpdate.startPointer.getOrElse(taskValidator.getTaskToBeUpdated(id).get.startPointer),
                                                     taskUpdate.workingTime.getOrElse(taskValidator.getTaskToBeUpdated(id).get.workingTime),
-                                                    task.projectId)) {
+                                                    task.projectId, task.id)) {
           throw new TimeConflictException
         } else {
           taskDataStorage
