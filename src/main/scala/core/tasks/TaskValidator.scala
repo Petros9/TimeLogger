@@ -19,7 +19,7 @@ class TaskValidator(taskDataStorage: TaskDataStorage, projectValidator: ProjectV
   }
 
   def boundariesOverlap(newStartPointer: Long, newEndPointer: Long, existingStartPointer: Long, existingEndPointer: Long): Boolean = {
-    (existingStartPointer < newEndPointer && existingEndPointer > newStartPointer)
+    existingStartPointer < newEndPointer && existingEndPointer > newStartPointer
   }
 
   def timeDoesNotOverlap(startPointer: Long, workingTime: Long, projectId: ProjectId, newTaskId: TaskId): Boolean = {

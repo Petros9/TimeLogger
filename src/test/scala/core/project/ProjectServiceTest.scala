@@ -254,7 +254,6 @@ class ProjectServiceTest extends BaseServiceTest {
     val ProjectService = new ProjectService(ProjectStorage, ProjectValidator)
 
     val endPoint: Long = 0L
-
     val testOwner1: String = "30313317-59c1-4a53-965e-20baf6f2e1f3"
     val testOwner2: String = "c145395f-8f73-44db-a1e1-156300bf6a71"
 
@@ -266,6 +265,7 @@ class ProjectServiceTest extends BaseServiceTest {
     val testProject5: Project = testProject(testOwner1)
     val testProject6: Project = testProject(testOwner1)
     def testProject(owner: UserId):Project = Project(UUID.randomUUID().toString, UUID.randomUUID().toString,Random.nextLong(1637336456494L), 0L, owner)
+
   }
 
 }

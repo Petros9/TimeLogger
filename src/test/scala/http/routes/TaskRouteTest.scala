@@ -75,7 +75,6 @@ class TaskRouteTest  extends BaseServiceTest {
 
         projectService.createProject(testProject1)
         taskService.createTask(testTask2)
-        val updateTestTask2 = TaskDataUpdate(None, Some(1234), None, Some("asdas"), None)
         val header = RawHeader("Token", buildAuthToken(testOwner1))
         val requestEntity = HttpEntity(MediaTypes.`application/json`, s"""{"id": "${testTask2.id}", "startPointer": "${testTask2.startPointer}", "volume": "${testTask2.volume + 13}", "workingTime": "${testTask2.workingTime}", "desc": "${testTask2.desc + "asd"}", "endPointer": "${testTask2.endPointer}"}""")
         Post("/tasks", requestEntity).withHeaders(header) ~> taskRoute ~> check {

@@ -10,7 +10,7 @@ import akka.http.scaladsl.server.Route
 import core.tasks.TaskService
 import core.{Task, TaskDataUpdate}
 import utils.SecurityDirectives.authenticate
-import utils.responses.{NameOccupiedException, NameOccupiedResponse, NoResourceException, NoResourceResponse, NotAuthorisedException, NotAuthorisedResponse, TimeConflictException, TimeConflictResponse}
+import utils.responses.{NoResourceException, NoResourceResponse, NotAuthorisedException, NotAuthorisedResponse, TimeConflictException, TimeConflictResponse}
 
 import scala.concurrent.ExecutionContext
 class TaskRoute(
