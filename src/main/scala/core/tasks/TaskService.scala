@@ -16,9 +16,17 @@ class TaskService(taskDataStorage: TaskDataStorage, taskValidator: TaskValidator
 
 
   @throws(classOf[NotAuthorisedException])
-  def getProjectTasks(projectId: ProjectId, token: String): Future[Seq[Task]] = {
+  def getProjectTasks(projectId: ProjectId, token: String): Seq[Task] = {
     if(projectValidator.isOwner(projectId, token)){
-      taskDataStorage.getProjectTasks(projectId)
+      val potentialProjects = taskDataStorage.getProjectTasks(projectId)
+      potentialProjects.value match {
+        case Some(projects) =>
+          if (projects.get.isEmpty) Seq()
+          else projects.get
+
+        case None => Seq()
+      }
+
     } else {
       throw new NotAuthorisedException
     }
@@ -30,6 +38,7 @@ class TaskService(taskDataStorage: TaskDataStorage, taskValidator: TaskValidator
   @throws(classOf[NoResourceException])
   @throws(classOf[TimeConflictException])
   def createTask(task: Task): Future[Task] = {
+
     if(!projectValidator.isNotDeleted(task.projectId)){
       throw new NoResourceException
     } else if(!taskValidator.timeDoesNotOverlap(task.startPointer, task.workingTime, task.projectId, task.id)){

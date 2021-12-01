@@ -20,8 +20,8 @@ package object responses {
     }
   }
 
-  case class NameOccupiedResponse(code: Int = 403, message: String = "ERROR, This name is already in use")
-  case class NoResourceResponse(code: Int = 404, message: String = "ERROR, No resource found")
-  case class NotAuthorisedResponse(code: Int = 401, message: String = "ERROR, Unauthorised")
-  case class TimeConflictResponse(code: Int = 403, message: String = "ERROR, Task time conflict")
+  case class NameOccupiedResponse(message: String = "ERROR, This name is already in use")
+  case class NoResourceResponse(message: String = "ERROR, No resource found")
+  case class NotAuthorisedResponse(message: String = "ERROR, Unauthorised")
+  case class TimeConflictResponse(message: String = "ERROR, Task time conflict")
 }

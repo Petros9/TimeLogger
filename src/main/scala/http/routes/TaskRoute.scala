@@ -1,5 +1,6 @@
 package http.routes
 
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives.{as, complete, entity, path, pathEndOrSingleSlash, pathPrefix, post}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import io.circe.generic.codec.DerivedAsObjectCodec.deriveCodec
@@ -46,8 +47,10 @@ class TaskRoute(
           post {
             entity(as[IdAndUpdateTaskData]) { idAndUpdateTaskData =>
               complete(
-                try updateTask(idAndUpdateTaskData.id, idAndUpdateTaskData.updateTaskData, userId).map(_.asJson)
-                catch {
+                try {
+                  updateTask(idAndUpdateTaskData.id, TaskDataUpdate(Option(idAndUpdateTaskData.startPointer), Option(idAndUpdateTaskData.volume), Option(idAndUpdateTaskData.workingTime), Option(idAndUpdateTaskData.desc), Option(idAndUpdateTaskData.endPointer)), userId).map(_.asJson)
+                }
+            catch {
                   case _: NoResourceException => NoResourceResponse().asJson
                   case _: TimeConflictException => TimeConflictResponse().asJson
                   case _: NotAuthorisedException => NotAuthorisedResponse().asJson
@@ -58,5 +61,5 @@ class TaskRoute(
     }
   }
   private case class Id(id: String)
-  private case class IdAndUpdateTaskData(id: String, updateTaskData: TaskDataUpdate)
+  private case class IdAndUpdateTaskData(id: String, startPointer: Long, volume: Int, workingTime: Long, desc: String, endPointer: Long)
 }

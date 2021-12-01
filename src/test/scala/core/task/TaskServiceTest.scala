@@ -27,8 +27,7 @@ class TaskServiceTest  extends BaseServiceTest{
           _ <- ProjectStorage.saveProject(testProject1)
           _ <- TaskService.createTask(testTask1)
           _ <- TaskService.createTask(testTask2)
-          tasks <- TaskService.getProjectTasks(testProject1.id, testOwner1)
-        } yield tasks.size == 2 shouldBe true)
+        } yield TaskService.getProjectTasks(testProject1.id, testOwner1).size == 2 shouldBe true)
       }
 
       "throw not-authorised-exception when user is not authorised" in new Context {
@@ -52,6 +51,13 @@ class TaskServiceTest  extends BaseServiceTest{
         }.isInstanceOf[NoResourceException] shouldBe  true)
       }
 
+      "throw no-resource-exception when project does not exists" in new Context {
+        awaitForResult(for {
+          _ <- ProjectStorage.saveProject(testProject2)
+        } yield  intercept[Exception] {
+          TaskService.createTask(testTask1)
+        }.isInstanceOf[NoResourceException] shouldBe  true)
+      }
       "throw time-conflict-exception when new task overlaps with the added ones" in new Context {
         awaitForResult(for {
           _ <- ProjectStorage.saveProject(testProject1)

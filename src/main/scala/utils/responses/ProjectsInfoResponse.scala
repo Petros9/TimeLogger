@@ -14,7 +14,7 @@ object ProjectsInfoResponse {
   }
 
   def apply(projects: Seq[Project], updateTimeSortingOption: Option[Boolean], taskService: TaskService): Seq[ProjectInfoResponseWithoutTime] = {
-      val projectsWithTasks = projects.map(project => ProjectInfoResponseWithoutTime(project, Await.result(taskService.getProjectTasks(project.id, project.owner), Duration.Inf)))
+      val projectsWithTasks = projects.map(project => ProjectInfoResponseWithoutTime(project, taskService.getProjectTasks(project.id, project.owner)))
 
     updateTimeSortingOption match {
       case Some(updateTimeSorting) =>
