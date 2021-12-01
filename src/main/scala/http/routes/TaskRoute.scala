@@ -28,8 +28,8 @@ class TaskRoute(
             complete(
               try createTask(task).map(_.asJson)
               catch {
-                case _: NoResourceException => NoResourceResponse().asJson
-                case _: TimeConflictException => TimeConflictResponse().asJson
+                case _: NoResourceException => (StatusCodes.NoContent, NoResourceResponse().asJson)
+                case _: TimeConflictException => (StatusCodes.Conflict, TimeConflictResponse().asJson)
               })
           }
         } ~
@@ -38,9 +38,9 @@ class TaskRoute(
               complete(
                 try deleteTask(id.id, userId).map(_.asJson)
                 catch {
-                  case _: NoResourceException => NoResourceResponse().asJson
-                  case _: TimeConflictException => TimeConflictResponse().asJson
-                  case _: NotAuthorisedException => NotAuthorisedResponse().asJson
+                  case _: NoResourceException => (StatusCodes.NoContent, NoResourceResponse().asJson)
+                  case _: TimeConflictException => (StatusCodes.Conflict, TimeConflictResponse().asJson)
+                  case _: NotAuthorisedException => (StatusCodes.Unauthorized, NotAuthorisedResponse().asJson)
                 })
             }
           } ~
@@ -51,9 +51,9 @@ class TaskRoute(
                   updateTask(idAndUpdateTaskData.id, TaskDataUpdate(Option(idAndUpdateTaskData.startPointer), Option(idAndUpdateTaskData.volume), Option(idAndUpdateTaskData.workingTime), Option(idAndUpdateTaskData.desc), Option(idAndUpdateTaskData.endPointer)), userId).map(_.asJson)
                 }
             catch {
-                  case _: NoResourceException => NoResourceResponse().asJson
-                  case _: TimeConflictException => TimeConflictResponse().asJson
-                  case _: NotAuthorisedException => NotAuthorisedResponse().asJson
+                  case _: NoResourceException => (StatusCodes.NoContent, NoResourceResponse().asJson)
+                  case _: TimeConflictException => (StatusCodes.Conflict, TimeConflictResponse().asJson)
+                  case _: NotAuthorisedException => (StatusCodes.Unauthorized, NotAuthorisedResponse().asJson)
                 })
             }
           }

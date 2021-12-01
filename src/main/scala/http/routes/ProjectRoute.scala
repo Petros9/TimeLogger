@@ -1,5 +1,6 @@
 package http.routes
 
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives.{as, complete, entity, path, pathEndOrSingleSlash, pathPrefix, post, _}
 import akka.http.scaladsl.server.Route
 import core.projects.ProjectService
@@ -30,7 +31,7 @@ class ProjectRoute(
               complete(
                 try createProject(project).map(_.asJson)
                 catch  {
-                  case _: NameOccupiedException => NameOccupiedResponse().asJson
+                  case _: NameOccupiedException => (StatusCodes.Conflict, NameOccupiedResponse().asJson)
                 })
             }
           } ~
@@ -39,9 +40,9 @@ class ProjectRoute(
                 complete(
                   try deleteProject(id.id, userId).map(_.asJson)
                   catch {
-                    case _: NotAuthorisedException => NotAuthorisedResponse().asJson
-                    case _: NoResourceException => NoResourceResponse().asJson
-                    case _: NameOccupiedException => NameOccupiedResponse().asJson
+                    case _: NotAuthorisedException => (StatusCodes.Unauthorized, NotAuthorisedResponse().asJson)
+                    case _: NoResourceException => (StatusCodes.NoContent, NoResourceResponse().asJson)
+                    case _: NameOccupiedException => (StatusCodes.Conflict, NameOccupiedResponse().asJson)
                   }
                 )
               }
@@ -51,9 +52,9 @@ class ProjectRoute(
                 complete(
                   try updateProject(idAndUpdateProjectData.id, ProjectDataUpdate(Option(idAndUpdateProjectData.projectName), Option(idAndUpdateProjectData.endPoint)), userId).map(_.asJson)
                   catch {
-                    case _: NotAuthorisedException => NotAuthorisedResponse().asJson
-                    case _: NoResourceException => NoResourceResponse().asJson
-                    case _: NameOccupiedException => NameOccupiedResponse().asJson
+                    case _: NotAuthorisedException => (StatusCodes.Unauthorized, NotAuthorisedResponse().asJson)
+                    case _: NoResourceException => (StatusCodes.NoContent, NoResourceResponse().asJson)
+                    case _: NameOccupiedException => (StatusCodes.Conflict, NameOccupiedResponse().asJson)
                   }
                 )
               }
