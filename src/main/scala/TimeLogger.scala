@@ -1,19 +1,12 @@
 import akka.actor.ActorSystem
-import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
-import core.Task
 import core.auth.{AuthService, JdbcAuthDataStorage}
-import core.projects.{JdbcProjectDataStorage, ProjectDataStorage, ProjectService, ProjectValidator}
+import core.projects.{JdbcProjectDataStorage, ProjectService, ProjectValidator}
 import core.tasks.{JdbcTaskDataStorage, TaskService, TaskValidator}
 import http.HttpRoute
-import io.circe.generic.auto.exportEncoder
-import io.circe.syntax.EncoderOps
-import utils.database.{Config, DatabaseConnector}
-import utils.responses.{NoResourceException, NoResourceResponse, TimeConflictException, TimeConflictResponse}
 
-import java.util.UUID
+import utils.database.{Config, DatabaseConnector}
 import scala.concurrent.ExecutionContext
-import scala.util.Random
 
 object TimeLogger extends App {
 
