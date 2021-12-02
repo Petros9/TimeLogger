@@ -27,4 +27,4 @@ This is the folder where all utilities are placed.
 
 ***Tests***
 
-Each file contains its own unit tests.
+Each file has its own unit tests.
